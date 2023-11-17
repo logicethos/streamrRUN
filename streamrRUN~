@@ -1,0 +1,175 @@
+#!/bin/bash
+
+REPO="streamr/broker-node"
+REPOPrefix="v1"
+
+STREAMRPATH=~/.streamrDocker
+STREAMRCONFIG=$STREAMRPATH/config/default.json
+STREAMRRUN="docker run -d -p 32200:32200 --name streamr --restart unless-stopped -v $STREAMRPATH:/home/streamr/.streamr"
+CONTAINER="streamr"
+SCRIPTBRANCH="main"
+
+# Regex patterns
+ethereumAddressPattern="^(0x)?[a-fA-F0-9]{40}$"
+
+# Local Overrides 
+[ -f .streamrenv ] && source .streamrenv
+
+# Reset
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;93m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
+
+# install any missing apps
+if ! command -v jq &> /dev/null || ! command -v curl &> /dev/null; then
+  echo "Installing required support apps....."
+  apt update && apt install -y curl jq whiptail
+fi
+
+#Make sure we are in the script directory
+cd "$(dirname "$0")"
+
+## Get latest version of the script
+if [[ ! $NOUPDATE -eq 1 ]]; then
+ git remote update
+ LAST_TAG=$(git describe --always --tags --abbrev=0 $SCRIPTBRANCH)
+ REMOTE_TAG=$(git describe --always --tags --abbrev=0 origin/$SCRIPTBRANCH)
+ if [ $LAST_TAG != $REMOTE_TAG ]; then
+     read -p "Script update available.  Update now? " -n 1 -r
+     if [[ $REPLY =~ ^[Yy]$ ]]
+     then
+        echo -e "${Yellow}Updating script${Color_Off}"
+        git pull --no-edit
+        exec ./streamrRUN  ##Run updated script we just pulled
+        exit
+     fi        
+ fi
+fi
+
+#Is Docker installed?
+if ! command -v docker &> /dev/null
+then
+  if whiptail --title "Install Docker" --yesno "Would you like to install Docker?" 10 60; then  
+      if [ "$EUID" -ne 0 ]
+        then echo "Please run as root (sudo/su)"
+        exit 1
+      fi    
+      echo "Installing Docker..."
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      sh get-docker.sh
+      rm get-docker.sh
+  else
+      exit 0
+  fi
+fi
+#Is Docker running?
+if ! docker info > /dev/null 2>&1; then
+  echo "This script uses docker, and it isn't running - please start docker and try again."
+  exit 1
+fi
+
+# Check if ~/.streamrDocker directory exists
+if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRPATH/config/default.json" ]; then
+    # Directory does not exist, ask user for action
+    CHOICE=$(whiptail --title "Setup Streamr" --menu "Choose an option" 15 60 2 \
+    "1" "Create New Config" \
+    "2" "Exit" 3>&1 1>&2 2>&3)
+
+    if [ "$CHOICE" = "1" ]; then
+        echo "Setting up Streamr..."
+        source streamrSetup
+        exit_code=$?
+        if [ $exit_code -ne 0 ]; then
+          exit 0
+        fi
+    else
+      exit 0
+    fi    
+fi
+
+
+# Get operator address (If exists)
+if [ -f "$STREAMRCONFIG" ]; then
+  operatorContractAddress=$(grep '"operatorContractAddress":' $STREAMRCONFIG | awk -F '"' '{print $4}')
+  if [[ $operatorContractAddress =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+   is_operator=true
+  fi
+else
+    echo "Streamr Config file is missing. You may want to re-run this script."
+    exit 1
+fi
+
+#Pulls list of latest images that match 
+GetTags(){
+  if [ -z "$TAGS" ]; then
+     TAGS=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=100" | jq -r '.results[].name' | grep "^$REPO_Prefix" | tail -n5)
+     MENU_TAGS=()
+     while read -r tag; do
+       MENU_OPTIONS+=("$tag" "$tag")
+     done <<< "$TAGS"
+  fi  
+}
+# Start menu loop
+while true; do
+
+  isRunning=$( [ "$(docker inspect -f {{.State.Running}} $CONTAINER 2>/dev/null)" = "true" ] && echo "true" || echo "false" )
+  imageName=$(docker inspect -f {{.Config.Image}} $CONTAINER)
+
+  if $isRunning; then
+     firstOption="Stop node $imageName"
+  else
+     firstOption="Start node"
+  fi
+
+  if [ "$is_operator" = true ]; then
+      MENU_TITLE="Operator $operatorContractAddress"
+  else
+      MENU_TITLE="Node"
+  fi
+  
+  CHOICE=$(whiptail --title "$MENU_TITLE" --menu "" 15 60 6 \
+  "1" "$firstOption" \
+  "2" "View Log" \
+  "3" "View Config" \
+  "4" "List Versions" \
+  "5" "Wallet" \
+  "6" "Exit" 3>&1 1>&2 2>&3)
+
+  # Process the user's selection
+  case $CHOICE in
+     1)
+         if $isRunning; then
+             echo "Stopping..."
+             docker stop streamr
+         else
+             echo "Running..."
+             docker rm streamr || true            
+             GetTags
+             SELECTED_TAG=$(whiptail --title "Run Stream Node" --menu "Choose a Version:" 15 60 5 "${MENU_TAGS[@]}" 3>&1 1>&2 2>&3)
+             eval "$STARTSTREAMR $REPO:$SELECTED_TAG"
+         fi
+         ;;
+     2) docker logs --follow streamr
+        ;;
+     3) less $STREAMRCONFIG    
+        ;;       
+     4) GetTags
+        whiptail --title "Version List" --msgbox "$TAGS" 15 50
+        ;;   
+     5) echo "Starting wallet...."
+        source wallet
+        exit 0
+        ;;
+     *) exit 0
+        ;;
+  esac
+ done
+ 
+exit 0
