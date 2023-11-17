@@ -7,7 +7,7 @@
 #### Install (Debian/Ubuntu)
 
     apt update && apt install -y git curl jq whiptail
-    git clone https://github.com/logicethos/streamrRUN.git
+    git clone https://github.com/logicethos/streamrRun 
     cd streamrRUN
    ./streamrRUN
 
