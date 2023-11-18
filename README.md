@@ -6,10 +6,10 @@
   
 #### Install (Debian/Ubuntu)
 
-    apt update && apt install -y git curl jq whiptail
+    apt update && apt install -y git curl jq whiptail python3 python3-pip
     git clone https://github.com/logicethos/streamrRUN.git
     cd streamrRUN
-   ./streamrRUN
+    ./streamrRUN
 
 
 #### Manage your node

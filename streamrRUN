@@ -12,7 +12,7 @@ SCRIPTBRANCH="main"
 # Regex patterns
 ethereumAddressPattern="^(0x)?[a-fA-F0-9]{40}$"
 
-# Local Overrides 
+# Local Overrides - if you want to make changed to the above, put it in a file called .streamrenv
 [ -f .streamrenv ] && source .streamrenv
 
 # Reset
@@ -29,7 +29,7 @@ White='\033[0;37m'        # White
 
 # install any missing apps
 if ! command -v jq &> /dev/null || ! command -v curl &> /dev/null; then
-  echo "Installing required support apps....."
+  echo -e "${Yellow}Installing required support apps.....${Color_Off}"
   apt update && apt install -y curl jq whiptail
 fi
 
@@ -58,10 +58,10 @@ if ! command -v docker &> /dev/null
 then
   if whiptail --title "Install Docker" --yesno "Would you like to install Docker?" 10 60; then  
       if [ "$EUID" -ne 0 ]
-        then echo "Please run as root (sudo/su)"
+        then echo -e "${Cyan}Please run as root (sudo/su)${Color_Off}"
         exit 1
       fi    
-      echo "Installing Docker..."
+      echo -e "${Yellow}Installing Docker...${Color_Off}"
       curl -fsSL https://get.docker.com -o get-docker.sh
       sh get-docker.sh
       rm get-docker.sh
@@ -71,7 +71,7 @@ then
 fi
 #Is Docker running?
 if ! docker info > /dev/null 2>&1; then
-  echo "This script uses docker, and it isn't running - please start docker and try again."
+  echo -e "${Cyan}This script uses docker, and it isn't running - please start docker and try again.${Color_Off}"
   exit 1
 fi
 
@@ -102,7 +102,7 @@ if [ -f "$STREAMRCONFIG" ]; then
    is_operator=true
   fi
 else
-    echo "Streamr Config file is missing. You may want to re-run this script."
+    echo -e "${Red}Streamr Config file is missing. You may want to re-run this script.${Color_Off}"
     exit 1
 fi
 
