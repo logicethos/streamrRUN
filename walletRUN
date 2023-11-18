@@ -24,4 +24,4 @@ if ! pip3 list | grep -q web3; then
     pip3 install web3
 fi
 
-python3 wallet.py
+python3 walletRUN.py
