@@ -163,7 +163,7 @@ while true; do
      4) GetTags
         whiptail --title "Version List" --msgbox "$TAGS" 15 50
         ;;   
-     5) whiptail --title "Wallet" --msgbox "$(source walletRUN)" 15 50
+     5) whiptail --title "Wallet" --msgbox "$(python3 walletRUN.py)" 15 50
         ;;
      *) exit 0
         ;;

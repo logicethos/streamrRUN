@@ -119,8 +119,34 @@ if check_operator_contract_address_exists; then
   fi
 fi
 
+
+# Function to check if a command exists
+command_exists() {
+    type "$1" &> /dev/null ;
+}
+
+# Check for Python and install it if it's not present
+if ! command_exists python3; then
+    echo "Python is not installed. Installing Python..."
+    sudo apt update
+    sudo apt install python3 -y
+fi
+
+# Check for pip and install it if it's not present
+if ! command_exists pip3; then
+    echo "pip is not installed. Installing pip..."
+    sudo apt install python3-pip -y
+fi
+
+# Check for Web3.py and install it if it's not present
+if ! pip3 list | grep -q web3; then
+    echo "Web3.py is not installed. Installing Web3.py..."
+    pip3 install web3 --break
+fi
+
+
 if check_privateKey_exists; then
-  whiptail --title "Wallet" --msgbox "$(source walletRUN)" 15 50
+  whiptail --title "Wallet" --msgbox "$(python3 walletRUN.py)" 15 50
 fi
 
 echo -e "${Yellow}Streamr configuration is complete.${Color_Off}"
