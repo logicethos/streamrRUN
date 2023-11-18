@@ -163,9 +163,7 @@ while true; do
      4) GetTags
         whiptail --title "Version List" --msgbox "$TAGS" 15 50
         ;;   
-     5) echo "Starting wallet...."
-        source walletRUN
-        exit 0
+     5) whiptail --title "Wallet" --msgbox "$(source walletRUN)" 15 50
         ;;
      *) exit 0
         ;;

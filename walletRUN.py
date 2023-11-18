@@ -31,15 +31,11 @@ def validate_or_create_private_key(private_key, file_path):
         return private_key
     except ValueError as e:
         # Catch specific exception related to invalid private key format
-        print("Invalid private key format:", e)
-        create_new = input("Do you want to create a new one? (yes/no): ")
-        if create_new.lower() == 'yes':
-            new_account = Account.create()
-            new_private_key = new_account.key.hex()  # Use .key.hex() instead of .privateKey.hex()
-            update_json_file_with_new_key(file_path, new_private_key)
-            return new_private_key
-        else:
-            raise Exception("Invalid private key and user opted not to create a new one.")
+        print("Invalid private key format or not set - creating")
+        new_account = Account.create()
+        new_private_key = new_account.key.hex()  # Use .key.hex() instead of .privateKey.hex()
+        update_json_file_with_new_key(file_path, new_private_key)
+        return new_private_key
 
 def update_json_file_with_new_key(file_path, new_private_key):
     with open(file_path, 'r+') as file:
