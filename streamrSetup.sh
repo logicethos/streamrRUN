@@ -120,7 +120,7 @@ if check_operator_contract_address_exists; then
 fi
 
 if check_privateKey_exists; then
-  source walletRUN
+  whiptail --title "Wallet" --msgbox "$(source walletRUN)" 15 50
 fi
 
 echo -e "${Yellow}Streamr configuration is complete.${Color_Off}"
