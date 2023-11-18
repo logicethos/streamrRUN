@@ -128,20 +128,20 @@ command_exists() {
 # Check for Python and install it if it's not present
 if ! command_exists python3; then
     echo "Python is not installed. Installing Python..."
-    sudo apt update
-    sudo apt install python3 -y
+    apt install python3 -y
 fi
 
 # Check for pip and install it if it's not present
 if ! command_exists pip3; then
     echo "pip is not installed. Installing pip..."
-    sudo apt install python3-pip -y
+    apt install python3-pip -y
 fi
 
 # Check for Web3.py and install it if it's not present
 if ! pip3 list | grep -q web3; then
-    echo "Web3.py is not installed. Installing Web3.py..."
-    pip3 install web3 --break
+    echo "Web3.py is not installed. Installing Web3.py..."    
+    PIP_BREAK_SYSTEM_PACKAGES=1
+    pip3 install web3
 fi
 
 
