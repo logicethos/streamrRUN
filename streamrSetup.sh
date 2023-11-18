@@ -1,4 +1,17 @@
 #!/bin/bash
+#Helper script for streamr node config file.
+
+# Reset
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;93m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
 
 
 # Set STREAMRPATH to ~/.streamrDocker if not already set
@@ -32,11 +45,10 @@ check_privateKey_exists() {
     jq -e '.client.auth | has("privateKey")' "$STREAMRCONFIG" > /dev/null 2>&1
 }
 
-
-
 get_operator_contract_address() {
     echo $(jq -r '.plugins.operator.operatorContractAddress' "$STREAMRCONFIG")
 }
+
 set_operator_id()
 {
   while true; do
@@ -86,15 +98,14 @@ if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRCONFIG" ]; then
             ;;
     esac
 fi
+
 #Check config now exists.
 if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRCONFIG" ]; then
-  echo "Fail to find $STREAMRCONFIG"
+  echo -e "${Red}Fail to find $STREAMRCONFIG${Color_Off}"
   exit 1
 fi
 
-
 if check_operator_contract_address_exists; then
-
   OPERATOR_ID=$(get_operator_contract_address)
   if [ ! $(validate_ethereum_address "$OPERATOR_ID") == "valid" ]; then
       set_operator_id
@@ -112,4 +123,4 @@ if check_privateKey_exists; then
   source wallet
 fi
 
-echo "Streamr configuration is complete."
+echo -e "${Yellow}Streamr configuration is complete.${Color_Off}"
