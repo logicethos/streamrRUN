@@ -12,10 +12,19 @@ from pathlib import Path
 
 
 def get_private_key_and_url_from_json(file_path):
+    default_rpc_url = "https://polygon-rpc.com"
+
     with open(file_path, 'r') as file:
         data = json.load(file)
         private_key = data['client']['auth']['privateKey']
-        url = data['client']['contracts']['mainChainRPCs']['rpcs'][0]['url']
+
+        # Try to get the URL from the JSON structure
+        try:
+            url = data['client']['contracts']['mainChainRPCs']['rpcs'][0]['url']
+        except KeyError:
+            # If the specific keys are not found, use the default URL
+            url = default_rpc_url
+
         return private_key, url
 
 def get_public_key_and_balance(private_key, w3):

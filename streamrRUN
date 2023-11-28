@@ -109,7 +109,8 @@ fi
 #Pulls list of latest images that match 
 GetTags(){
   if [ -z "$TAGS" ]; then
-     TAGS=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=100" | jq -r '.results[].name' | grep "^$REPO_Prefix" | tail -n5)
+#     TAGS=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=100" | jq -r '.results[].name' | grep "^$REPO_Prefix" | tail -n5)
+     TAGS=$(curl -s "https://hub.docker.com/v2/repositories/$REPO/tags/?page_size=100" | jq -r '.results[] | "\(.last_updated) \(.name)"' | sort -r | grep " $REPO_Prefix" | cut -d " " -f2- | head -n5)
      MENU_TAGS=()
      while read -r tag; do
        MENU_TAGS+=("$tag" "$tag")

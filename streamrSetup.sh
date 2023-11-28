@@ -26,7 +26,7 @@ STREAMRCONFIG=$STREAMRPATH/config/default.json
 if [ -z "$REPO" ]; then
     REPO="streamr/broker-node"
 fi
-
+REPO_TAG="v100.0.0-testnet-one.0"
 
 ethereumAddressPattern="^(0x)?[a-fA-F0-9]{40}$"
 validate_ethereum_address() {
@@ -76,16 +76,16 @@ set_operator_id()
 if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRCONFIG" ]; then
     # Directory or file does not exist, ask user for action
     CHOICE=$(whiptail --title "Setup Streamr" --menu "Choose an option" 15 60 3 \
-    "1" "Node (config-wizard)" \
+    "1" "Node Testnet" \
     "2" "Mumbai Operator Node" \
     "3" "Exit" 3>&1 1>&2 2>&3)
 
     case "$CHOICE" in
         "1")
-            echo "Setting up Streamr..."
-            mkdir -p $STREAMRPATH
+            echo "Setting up Testnet Operator Node..."
+            mkdir -p $(dirname "$STREAMRCONFIG")
+            cp config_template $STREAMRCONFIG
             chmod -R 777 $STREAMRPATH
-            docker run -it -v $STREAMRPATH:/home/streamr/.streamr $REPO:latest bin/config-wizard
             ;;
         "2")
             echo "Setting up Mumbai Operator Node..."
