@@ -84,7 +84,7 @@ if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRCONFIG" ]; then
         "1")
             echo "Setting up Testnet Operator Node..."
             mkdir -p $(dirname "$STREAMRCONFIG")
-            cp config_template $STREAMRCONFIG
+            cp templates/config_operator $STREAMRCONFIG
             chmod -R 777 $STREAMRPATH
             ;;
         "2")

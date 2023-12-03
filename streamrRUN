@@ -5,7 +5,7 @@ REPO_Prefix="v1"
 
 STREAMRPATH=~/.streamrDocker
 STREAMRCONFIG=$STREAMRPATH/config/default.json
-STREAMRRUN="docker run -d -p 32200:32200 --name streamr --restart unless-stopped -v $STREAMRPATH:/home/streamr/.streamr"
+STREAMRRUN="docker run -d --net=host --name streamr --restart unless-stopped -v $STREAMRPATH:/home/streamr/.streamr"
 CONTAINER="streamr"
 SCRIPTBRANCH="main"
 

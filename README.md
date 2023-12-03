@@ -2,6 +2,7 @@
   
  - Install & Manage a Streamr node
  - Menu driven
+ - iptables Firewall with Rate-Limiting
 
   
 #### Install (Debian/Ubuntu)
