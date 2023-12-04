@@ -94,6 +94,12 @@ if [ ! -d "$STREAMRPATH" ] || [ ! -f "$STREAMRPATH/config/default.json" ]; then
     fi    
 fi
 
+#copy iptables redirect file if not present.
+if [ ! -f "iptables.sh" ]; then
+    cp templates/iptables.sh_redirect iptables.sh
+    chmod +x iptables.sh
+fi
+
 
 # Get operator address (If exists)
 if [ -f "$STREAMRCONFIG" ]; then

@@ -1,0 +1,11 @@
+#!/bin/bash
+# Streamr Node iptables firewall script
+# Rate limits repeated connections.
+# Traffic to be rate limted, are sent to the RATE-LIMIT table
+#
+
+
+MAXCON=10   #Maximum connections from a single source IP
+#TrustedIP=("123.123.123.123") # your office, or other trusted IP
+
+source templates/iptables.sh "$@"
