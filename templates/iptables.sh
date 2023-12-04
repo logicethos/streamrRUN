@@ -1,8 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 # Streamr Node iptables firewall script
 # Rate limits repeated connections.
 # Traffic to be rate limted, are sent to the RATE-LIMIT table
 #
+
+
+if [ -z "$MAXCON" ]; then   #Maximum connections from a single source IP
+    MAXCON=10
+fi
+
 
 ClearTable()
 {
@@ -24,8 +30,11 @@ SetupPre()
 
 SetupPost()
 {
-        # --- RATE-LIMIT chain ---
-        (iptables --flush RATE-LIMIT || iptables --new-chain RATE-LIMIT) 2> /dev/null  # Create/clear RATE-LIMIT table
+        # --- Create RATE-LIMIT chain ---
+        (iptables --flush RATE-LIMIT || iptables --new-chain RATE-LIMIT) 2> /dev/null
+
+        #Maximum connections per source IP.
+        iptables --append RATE-LIMIT -p tcp --syn --match connlimit --connlimit-above $MAXCON --jump LOG --log-prefix "Max Connections: "
 
         #Track source IP, and if within limits accept
         iptables --append RATE-LIMIT --match hashlimit --hashlimit-mode srcip --hashlimit-upto 3/sec  --hashlimit-burst 20  --hashlimit-name conn_rate_limit  --jump ACCEPT
@@ -37,7 +46,12 @@ SetupPost()
 
 PrivilegedAccess()
 {
-    #  iptables -A INPUT -p tcp -s 123.123.123.123 -j ACCEPT   # Your office IP, or other trusted IP address
+      if [ ${#TrustedIP[@]} -gt 0 ]; then
+         for ip_or_domain in "${TrustedIP[@]}"; do
+            # Apply iptables rule for each trusted IP or domain
+            iptables -A INPUT -p tcp -s "$ip_or_domain" -j ACCEPT
+         done
+      fi
 }
 
 RegularPorts()
