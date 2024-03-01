@@ -1,7 +1,7 @@
 #!/bin/bash
 
-REPO="streamr/broker-node"
-REPO_Prefix="v1"
+REPO="streamr/node"
+REPO_Prefix="v"
 
 STREAMRPATH=~/.streamrDocker
 STREAMRCONFIG=$STREAMRPATH/config/default.json
